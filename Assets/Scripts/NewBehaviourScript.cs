@@ -17,6 +17,7 @@ public class NewBehaviourScript : MonoBehaviour
         GetComponent<Renderer>().material.color = Color.red;
     }
 
+
     private void OnMouseUp()
     {
         GetComponent<Renderer>().material.color = colorStart;
