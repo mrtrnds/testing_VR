@@ -3,7 +3,14 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - ContentParent
+  - x_arrow
+  - y_arrow
+  - z_arrow
+  - x_rotate_arrow
+  - y_rotate_arrow
+  - z_rotate_arrow
   layers:
   - Default
   - TransparentFX
@@ -13,7 +20,7 @@ TagManager:
   - UI
   - 
   - 
-  - 
+  - ClickableObject
   - 
   - 
   - 
