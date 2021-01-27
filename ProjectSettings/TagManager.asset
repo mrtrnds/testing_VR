@@ -11,6 +11,9 @@ TagManager:
   - x_rotate_arrow
   - y_rotate_arrow
   - z_rotate_arrow
+  - x_scale_arrow
+  - y_scale_arrow
+  - z_scale_arrow
   layers:
   - Default
   - TransparentFX

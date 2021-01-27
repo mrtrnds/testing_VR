@@ -19,7 +19,7 @@ public class ButtonSelection : MonoBehaviour
     {
         buttonSelected = buttonName;
         //Destroy (clone);
-
+ 
         if (buttonName == "Annotation")
         {
             Cursor.SetCursor(cursorTexture_annotation, Vector2.zero, cursorMode);
