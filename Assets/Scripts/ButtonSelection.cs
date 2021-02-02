@@ -9,8 +9,6 @@ public class ButtonSelection : MonoBehaviour
     public Texture2D cursorTexture_move;
     public Texture2D cursorTexture_scale;
     public Texture2D cursorTexture_rotate;
-    //public GameObject move_arrow;
-    //private GameObject clone;
     private CursorMode cursorMode = CursorMode.Auto;
 
     // This function is called when the buttons are pressed and passed the name of the button
@@ -34,10 +32,6 @@ public class ButtonSelection : MonoBehaviour
         }
         else if (buttonName == "Move")
         {
-            //GameObject theParentObject = GameObject.Find("EditorOnly");
-            //GameObject clone = Instantiate(move_arrow, theParentObject.transform.position, theParentObject.transform.rotation);
-            //clone.transform.SetParent(theParentObject.transform);
-            //clone.transform.Rotate(0, 90, 0);
             Cursor.SetCursor(cursorTexture_move, Vector2.zero, cursorMode);
         }
         else

@@ -10,13 +10,15 @@ public class Transformation : MonoBehaviour
     private Vector3 firstPosition;
     private bool firstCalled = true;
     public Camera thisCam;
-    public GameObject moveArrow;
-    public GameObject rotateArrow;
-    public GameObject scaleArrow;
-    public Material transparentMaterial;
+    public GameObject moveArrow = null;
+    public GameObject rotateArrow = null;
+    public GameObject scaleArrow = null;
+    public Material transparentMaterial = null;
     private Material defaultMaterial;
     private GameObject clone, clone2, clone3;
     private string previousButton = null;
+    private Vector3 scaleVector;
+    private float scaleFactor;
 
     private Vector3 GetMouseWorldPos()
     {
@@ -34,152 +36,118 @@ public class Transformation : MonoBehaviour
         return clickPosition;
     }
 
-    public void OnMouseDown()
+    public void Update()
     {
+        scaleFactor = (Camera.main.transform.position - transform.position).magnitude;
         GameObject thePlayerIs = GameObject.Find("MainCamera");
         ButtonSelection theChoiseOfThePlayerIs = thePlayerIs.GetComponent<ButtonSelection>();
-        Transformation [] tests = FindObjectsOfType<Transformation>();
-        if (firstCalled == true)
+
+        if (theChoiseOfThePlayerIs.buttonSelected != previousButton && previousButton != "" && this.tag == "selectedObject")
         {
+            firstCalled = true;
+            OnMouseDown();  
+        }
+        if (firstCalled == false)
+        {
+            scaleVector = transform.localScale;
+            clone.transform.localScale = new Vector3((scaleFactor * 1.5f) / scaleVector[0], (scaleFactor * 1.5f) / scaleVector[1], (scaleFactor * 1.5f) / scaleVector[2]);
+            clone2.transform.localScale = new Vector3((scaleFactor * 1.5f) / scaleVector[0], (scaleFactor * 1.5f) / scaleVector[1], (scaleFactor * 1.5f) / scaleVector[2]);
+            clone3.transform.localScale = new Vector3((scaleFactor * 1.5f) / scaleVector[0], (scaleFactor * 1.5f) / scaleVector[1], (scaleFactor * 1.5f) / scaleVector[2]);
+        }
+        previousButton = theChoiseOfThePlayerIs.buttonSelected;
+    }
+
+    public void OnMouseDown() {
+        GameObject thePlayerIs = GameObject.Find("MainCamera");
+        ButtonSelection theChoiseOfThePlayerIs = thePlayerIs.GetComponent<ButtonSelection>();
+        string selectedButton = theChoiseOfThePlayerIs.buttonSelected;
+        GameObject[] tests = GameObject.FindGameObjectsWithTag("selectedObject");
+        GameObject arrow = null;
+
+        if (firstCalled == true && selectedButton != "") {
             defaultMaterial = GetComponent<MeshRenderer>().material;
         }
-        if (firstCalled == true || (previousButton != null && previousButton != theChoiseOfThePlayerIs.buttonSelected))
-        {
-            previousButton = theChoiseOfThePlayerIs.buttonSelected;
-            //clear arrow from other selected models
-            for (int i = 0; i < tests.Length; i++)
-            {
-                tests[i].GetComponent<MeshRenderer>().material = defaultMaterial;
-                Destroy(tests[i].GetComponent<Transformation>().clone);
-                Destroy(tests[i].GetComponent<Transformation>().clone2);
-                Destroy(tests[i].GetComponent<Transformation>().clone3);
-                tests[i].firstCalled = true;
+        if ((firstCalled == true && selectedButton != "") || (previousButton != null && previousButton != selectedButton)) {
+            previousButton = selectedButton;
+            //clear arrows from other selected gameobjects
+            for (int i = 0; i < tests.Length; i++) {
+                if (tests[i].tag == "selectedObject"){
+                    tests[i].GetComponent<MeshRenderer>().material = defaultMaterial;
+                    Destroy(tests[i].GetComponent<Transformation>().clone);
+                    Destroy(tests[i].GetComponent<Transformation>().clone2);
+                    Destroy(tests[i].GetComponent<Transformation>().clone3);
+                    tests[i].GetComponent<Transformation>().firstCalled = true;
+                    tests[i].tag = "Untagged";
+                    tests[i].layer = LayerMask.NameToLayer("Default");
+                }
+                else
+                    continue;
             }
+            gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
             GetComponent<MeshRenderer>().material = transparentMaterial;
-            firstCalled = false;
+            this.firstCalled = false;
+            this.tag = "selectedObject";
 
-            if (theChoiseOfThePlayerIs.buttonSelected == "Move")
+            if (selectedButton == "Move")
             {
-                //arrow aksona Z
-                clone = Instantiate(moveArrow, transform.position, transform.rotation);
-                clone.transform.SetParent(transform);
+                arrow = moveArrow;
+            }
+            else if (selectedButton == "Rotate")
+            {
+                arrow = rotateArrow;
+            }
+            else if (selectedButton == "Scale")
+            {
+                arrow = scaleArrow;
+            }
+
+            clone = Instantiate(arrow, transform.position, transform.rotation);
+            clone.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+            clone.GetComponent<Renderer>().material.SetColor("_Color", Color.blue);
+            clone.transform.SetParent(transform);
+
+            clone2 = Instantiate(arrow, transform.position, transform.rotation);
+            clone2.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+            clone2.GetComponent<Renderer>().material.SetColor("_Color", Color.green);
+            clone2.transform.SetParent(transform);
+
+            clone3 = Instantiate(arrow, transform.position, transform.rotation);
+            clone3.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+            clone3.GetComponent<Renderer>().material.SetColor("_Color", Color.red);
+            clone3.transform.SetParent(transform);
+
+            if (selectedButton == "Move") {
                 clone.tag = "z_arrow";
-                clone.transform.Rotate(0, 90, 0);
-                clone.GetComponent<Renderer>().material.SetColor("_Color", Color.blue);
-
-                //arrow aksona Y
-                clone2 = Instantiate(moveArrow, transform.position, transform.rotation);
-                clone2.transform.SetParent(transform);
                 clone2.tag = "y_arrow";
-                clone2.transform.Rotate(0, 0, -90);
-                clone2.GetComponent<Renderer>().material.SetColor("_Color", Color.green);
-
-                //arrow aksona X
-                clone3 = Instantiate(moveArrow, transform.position, transform.rotation);
-                clone3.transform.SetParent(transform);
                 clone3.tag = "x_arrow";
-                clone3.transform.Rotate(0, 180, 0);
-                clone3.GetComponent<Renderer>().material.SetColor("_Color", Color.red);
-            }
-            if (theChoiseOfThePlayerIs.buttonSelected == "Rotate")
-            {
-
-                //arrow aksona Z
-                clone = Instantiate(rotateArrow, transform.position, transform.rotation);
-                clone.transform.SetParent(transform);
-
-                Mesh mesh = GetComponent<MeshFilter>().mesh;
-                Vector3 bounds = mesh.bounds.max - mesh.bounds.min;
-
-                float maxLength = .0f;
-                for (int i = 0; i < 3; i++)
-                {
-                    if (maxLength < bounds[i])
-                        maxLength = bounds[i];
-                }
-
-                float initScalingFactor = clone.transform.localScale[0];
-                Vector3 boundsOfArrows = clone.GetComponent<MeshFilter>().mesh.bounds.max * initScalingFactor - clone.GetComponent<MeshFilter>().mesh.bounds.min * initScalingFactor;
-                float maxLengthOfArrows = .0f;
-                for (int i = 0; i < 3; i++)
-                {
-                    if (maxLengthOfArrows < boundsOfArrows[i])
-                        maxLengthOfArrows = boundsOfArrows[i];
-                }
-
-                initScalingFactor = initScalingFactor * (maxLength / maxLengthOfArrows) + initScalingFactor * (maxLength / maxLengthOfArrows) * 0.8f;
-
-                clone.tag = "z_rotate_arrow";
-                clone.transform.localScale = new Vector3(initScalingFactor, initScalingFactor, initScalingFactor * 0.5f);
-                //clone.transform.localPosition = Vector3.zero; // Or desired position
-                clone.transform.Rotate(180, 0, 0);
-                clone.GetComponent<Renderer>().material.SetColor("_Color", Color.blue);
-
-                //arrow aksona Y
-                clone2 = Instantiate(rotateArrow, transform.position, transform.rotation);
-                clone2.transform.SetParent(transform);
-                clone2.transform.localScale = new Vector3(initScalingFactor, initScalingFactor, initScalingFactor);
-                clone2.tag = "y_rotate_arrow";
-                clone2.transform.Rotate(90, 0, 0);
-                clone2.GetComponent<Renderer>().material.SetColor("_Color", Color.green);
-
-                //arrow aksona X
-                clone3 = Instantiate(rotateArrow, transform.position, transform.rotation);
-                clone3.transform.SetParent(transform);
-                clone3.transform.localScale = new Vector3(initScalingFactor, initScalingFactor, initScalingFactor);
-                clone3.tag = "x_rotate_arrow";
-                clone3.transform.Rotate(0, 270, 0);
-                clone3.GetComponent<Renderer>().material.SetColor("_Color", Color.red);
-            }
-            if (theChoiseOfThePlayerIs.buttonSelected == "Scale")
-            {
-                //arrow aksona Z
-                clone = Instantiate(scaleArrow, transform.position, transform.rotation);
-                clone.transform.SetParent(transform);
-                clone.tag = "z_scale_arrow";
                 clone.transform.Rotate(0, 90, 0);
-
-                //arrow aksona Y
-                clone2 = Instantiate(scaleArrow, transform.position, transform.rotation);
-                clone2.transform.SetParent(transform);
-                clone2.tag = "y_scale_arrow";
                 clone2.transform.Rotate(0, 0, -90);
-
-                //arrow aksona X
-                clone3 = Instantiate(scaleArrow, transform.position, transform.rotation);
-                clone3.transform.SetParent(transform);
-                clone3.tag = "x_scale_arrow";
                 clone3.transform.Rotate(0, 180, 0);
+            }
+            else if (selectedButton == "Rotate") {
+                clone.tag = "z_rotate_arrow";
+                clone2.tag = "y_rotate_arrow";
+                clone3.tag = "x_rotate_arrow";
+                clone.transform.Rotate(180, 0, 0);
+                clone2.transform.Rotate(90, 0, 0);
+                clone3.transform.Rotate(0, 270, 0);
+
+            }
+            else if (selectedButton == "Scale") {
+                clone.tag = "z_scale_arrow";
+                clone2.tag = "y_scale_arrow";
+                clone3.tag = "x_scale_arrow";
+                clone.transform.Rotate(0, 90, 0);
+                clone2.transform.Rotate(0, 0, -90);
+                clone3.transform.Rotate(0, 180, 0);
+
             }
         }
     }
 
-    private void OnMouseDrag()
-    {
-        GameObject thePlayerIs = GameObject.Find("MainCamera");
-        ButtonSelection theChoiseOfThePlayerIs = thePlayerIs.GetComponent<ButtonSelection>();
-        ToolSelection theToolSelected = thePlayerIs.GetComponent<ToolSelection>();
-
-        //Scale
-        if (theChoiseOfThePlayerIs.buttonSelected == "Scale")
-        {
-            print("Scale");
-        }
-        //Rotate
-        else if (theChoiseOfThePlayerIs.buttonSelected == "Rotate")
-        {
-            print("paokara");
-        }
-        // Move
-        else if (theChoiseOfThePlayerIs.buttonSelected == "Move")
-        {
-            print("aekaar");
-        }
-        else
-            Destroy(clone);
-    }
     void OnMouseUp()
     {
+
     }
 }
 

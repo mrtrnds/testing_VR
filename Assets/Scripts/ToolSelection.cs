@@ -7,13 +7,11 @@ public class ToolSelection : MonoBehaviour
     public string toolSelected = "";
     private GameObject parentGameObject;
     private Vector3 v3Pos;
-    private float threshold = 1f;
+    private float threshold = 0.1f;
     private Vector3 tempVector4 = Vector3.zero;
     private bool firstcall = true;
     private Vector3 firstParentGameObject = Vector3.zero;
     public float rotSpeed = 80f;
-
-
 
     private Vector3 GetMouseScreenPos()
     {
@@ -32,7 +30,6 @@ public class ToolSelection : MonoBehaviour
         return clickPosition;
     }
 
-
     private Vector3 GetWorldMousePosition(Vector3 inNormal, Vector3 inPoint)
     {
         Vector3 worldPosition = Vector3.zero;
@@ -48,11 +45,10 @@ public class ToolSelection : MonoBehaviour
         return worldPosition;
     }
 
-    private void OnMouseDown()
+    public void OnMouseDown()
     {
-
         List<string> listWithTags = new List<string>() {
-        "x_arrow", 
+        "x_arrow",
         "y_arrow",
         "z_arrow",
         "x_rotate_arrow",
@@ -74,7 +70,7 @@ public class ToolSelection : MonoBehaviour
         }
     }
 
-    private void OnMouseDrag()
+    public void OnMouseDrag()
     {
         parentGameObject = transform.parent.gameObject;
         Vector3 offset = Vector3.zero;
@@ -117,6 +113,7 @@ public class ToolSelection : MonoBehaviour
 
             if (Mathf.Abs((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100))) < threshold)
             {
+                Debug.Log("kanei return");
                 tempVector4 = worldPosition;
                 return;
             }
@@ -125,17 +122,17 @@ public class ToolSelection : MonoBehaviour
         else if (toolSelected == "z_rotate_arrow")
         {
             Vector3 normal = Vector3.Cross(parentGameObject.transform.up, parentGameObject.transform.right);
-            parentGameObject.transform.Rotate(Vector3.forward, -rotX * normal.x - rotY * normal.y);
+            parentGameObject.transform.Rotate(Vector3.forward, -rotX * normal.y - rotY * normal.x);
         }
         else if (toolSelected == "y_rotate_arrow")
         {
             Vector3 normal = Vector3.Cross(parentGameObject.transform.right, parentGameObject.transform.forward);
-            parentGameObject.transform.Rotate(Vector3.up, -rotX * normal.x - rotY * normal.y);
+            parentGameObject.transform.Rotate(Vector3.up, -rotX * normal.y - rotY * normal.x);
         }
         else if (toolSelected == "x_rotate_arrow")
         {
             Vector3 normal = Vector3.Cross(parentGameObject.transform.forward, parentGameObject.transform.up);
-            parentGameObject.transform.Rotate(Vector3.right, -rotX * normal.x - rotY * normal.y);
+            parentGameObject.transform.Rotate(Vector3.right, -rotX * normal.y - rotY * normal.x);
         }
         else if (toolSelected == "z_scale_arrow")
         {
@@ -174,7 +171,6 @@ public class ToolSelection : MonoBehaviour
 
     void OnMouseUp()
     {
-        firstcall = true;
+
     }
 }
-
