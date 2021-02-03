@@ -49,27 +49,16 @@ public class Transformation : MonoBehaviour
             firstCalled = true;
             OnMouseDown();  
         }
-        if (firstCalled == false && theChoiseOfThePlayerIs.buttonSelected != "Scaddle")
+        if (firstCalled == false)
         {
-            scaleVector[0] = (scaleFactor * 1.5f) / scaleVector[0];
-            scaleVector[1] = (scaleFactor * 1.5f) / scaleVector[1];
-            scaleVector[2] = (scaleFactor * 1.5f) / scaleVector[2];
+            scaleVector[0] = (scaleFactor * 1.5f);
+            scaleVector[1] = (scaleFactor * 1.5f);
+            scaleVector[2] = (scaleFactor * 1.5f);
 
             clone.transform.localScale = new Vector3(scaleVector[0],  scaleVector[1], scaleVector[2]);
             clone2.transform.localScale = new Vector3(scaleVector[0], scaleVector[1], scaleVector[2]);
             clone3.transform.localScale = new Vector3(scaleVector[0], scaleVector[1], scaleVector[2]);
         }
-        else if(firstCalled == false)
-        {
-            scaleVector[0] = (scaleFactor * 1.5f)/transform.localScale.x ;
-            scaleVector[1] = (scaleFactor * 1.5f)/transform.localScale.y ;
-            scaleVector[2] = (scaleFactor * 1.5f)/transform.localScale.z;
-
-            clone.transform.localScale = new Vector3(scaleVector[0], scaleVector[1], scaleVector[2]);
-            clone2.transform.localScale = new Vector3(scaleVector[0], scaleVector[1], scaleVector[2]);
-            clone3.transform.localScale = new Vector3(scaleVector[0], scaleVector[1], scaleVector[2]);
-        }
-
         previousButton = theChoiseOfThePlayerIs.buttonSelected;
     }
 
@@ -77,13 +66,13 @@ public class Transformation : MonoBehaviour
         GameObject thePlayerIs = GameObject.Find("MainCamera");
         ButtonSelection theChoiseOfThePlayerIs = thePlayerIs.GetComponent<ButtonSelection>();
         string selectedButton = theChoiseOfThePlayerIs.buttonSelected;
-        GameObject[] tests = GameObject.FindGameObjectsWithTag("selectedObject");
         GameObject arrow = null;
 
         if (firstCalled == true && selectedButton != "") {
             defaultMaterial = GetComponent<MeshRenderer>().material;
         }
         if ((firstCalled == true && selectedButton != "") || (previousButton != null && previousButton != selectedButton)) {
+            GameObject[] tests = GameObject.FindGameObjectsWithTag("selectedObject");
             previousButton = selectedButton;
             //clear arrows from other selected gameobjects
             for (int i = 0; i < tests.Length; i++) {
@@ -95,6 +84,7 @@ public class Transformation : MonoBehaviour
                     tests[i].GetComponent<Transformation>().firstCalled = true;
                     tests[i].tag = "Untagged";
                     tests[i].layer = LayerMask.NameToLayer("Default");
+                    tests[i].transform.parent.gameObject.tag = "Untagged";
                 }
                 else
                     continue;
@@ -103,6 +93,9 @@ public class Transformation : MonoBehaviour
             GetComponent<MeshRenderer>().material = transparentMaterial;
             this.firstCalled = false;
             this.tag = "selectedObject";
+            GameObject parentBox = this.transform.parent.gameObject;
+            parentBox.tag = "selectedParent";
+
 
             if (selectedButton == "Move")
             {
@@ -118,23 +111,23 @@ public class Transformation : MonoBehaviour
             }
 
             clone = Instantiate(arrow, transform.position, transform.rotation);
-            float rescale_clone_x = (scaleFactor * 1.5f) / transform.localScale.x;
-            float rescale_clone_y = (scaleFactor * 1.5f) / transform.localScale.y;
-            float rescale_clone_z = (scaleFactor * 1.5f) / transform.localScale.z;
+            float rescale_clone_x = (scaleFactor * 1.5f);
+            float rescale_clone_y = (scaleFactor * 1.5f);
+            float rescale_clone_z = (scaleFactor * 1.5f);
 
             clone.transform.localScale = new Vector3(rescale_clone_x, rescale_clone_y, rescale_clone_z);
             clone.GetComponent<Renderer>().material.SetColor("_Color", Color.blue);
-            clone.transform.SetParent(transform);
+            clone.transform.SetParent(parentBox.transform);
 
             clone2 = Instantiate(arrow, transform.position, transform.rotation);
             clone2.transform.localScale = new Vector3(rescale_clone_x, rescale_clone_y, rescale_clone_z);
             clone2.GetComponent<Renderer>().material.SetColor("_Color", Color.green);
-            clone2.transform.SetParent(transform);
+            clone2.transform.SetParent(parentBox.transform);
 
             clone3 = Instantiate(arrow, transform.position, transform.rotation);
             clone3.transform.localScale = new Vector3(rescale_clone_x, rescale_clone_y, rescale_clone_z);
             clone3.GetComponent<Renderer>().material.SetColor("_Color", Color.red);
-            clone3.transform.SetParent(transform);
+            clone3.transform.SetParent(parentBox.transform);
 
             if (selectedButton == "Move") {
                 clone.tag = "z_arrow";

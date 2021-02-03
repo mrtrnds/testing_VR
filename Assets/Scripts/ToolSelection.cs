@@ -4,23 +4,25 @@ using UnityEngine;
 
 public class ToolSelection : MonoBehaviour
 {
-    private string toolSelected = "";
-    private GameObject parentGameObject;
-    private Vector3 v3Pos;
-    private float threshold = 0.1f;
-    private bool firstcall = true;
-    private Vector3 firstParentGameObject = Vector3.zero;
     public float rotSpeed = 100.0f;
-    public float scaleSpeed = 1.0f;
+    public float scaleSpeed = 0.1f;
     public float moveSpeed = 1.0f;
+
+    private GameObject parentGameObject;
+    private GameObject modelGameObject;
+
+    private Vector3 firstParentGameObject = Vector3.zero;
     private Vector3 tempVector4 = Vector3.zero;
+
+    private string toolSelected = "";
+    private float threshold = 7.0f;
+    private bool firstcall = true;
 
     private Vector3 GetMouseScreenPos()
     {
         //Pixel coordinates (x,y)
         Vector2 mousePoint = Input.mousePosition;
         Vector2 clickPosition = -Vector2.one;
-        v3Pos = Input.mousePosition;
 
         Ray ray = Camera.main.ScreenPointToRay(mousePoint);
         RaycastHit hit;
@@ -59,7 +61,8 @@ public class ToolSelection : MonoBehaviour
         "x_scale_arrow",
         "y_scale_arrow",
         "z_scale_arrow"};
-        Vector3 mousePoint = Input.mousePosition;
+
+        Vector2 mousePoint = Input.mousePosition;
         Ray ray = Camera.main.ScreenPointToRay(mousePoint);
         RaycastHit hit;
 
@@ -72,10 +75,24 @@ public class ToolSelection : MonoBehaviour
         }
     }
 
+    private float calcMouseDif(Vector3 worldPosition, Vector3 normalVec)
+    {
+        return Mathf.Abs((worldPosition.x + 100) * normalVec.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normalVec.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normalVec.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normalVec.y * (tempVector4.y + 100)));
+    }
+
+    private Vector3 calcOffset(Vector3 worldPosition, Vector3 normalVec)
+    {
+        return new Vector3((worldPosition.x + 100) * normalVec.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normalVec.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normalVec.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normalVec.y * (tempVector4.y + 100)), 0.0f, 0.0f).normalized * Time.deltaTime * moveSpeed;
+    }
+
     public void OnMouseDrag()
     {
-        parentGameObject = transform.parent.gameObject;
+        parentGameObject = GameObject.FindGameObjectWithTag("selectedParent");
+        modelGameObject = GameObject.FindGameObjectWithTag("selectedObject");
         Vector3 offset = Vector3.zero;
+        Vector3 worldPosition = GetWorldMousePosition(Vector3.forward, firstParentGameObject);
+        float rotX = Input.GetAxis("Mouse X") * rotSpeed * Mathf.Deg2Rad;
+        float rotY = Input.GetAxis("Mouse Y") * rotSpeed * Mathf.Deg2Rad;
 
         if (firstcall == true)
         {
@@ -83,42 +100,40 @@ public class ToolSelection : MonoBehaviour
             firstParentGameObject = parentGameObject.transform.position;
         }
 
-        Vector3 worldPosition = GetWorldMousePosition(Vector3.forward, firstParentGameObject);
-        float rotX = Input.GetAxis("Mouse X") * rotSpeed * Mathf.Deg2Rad;
-        float rotY = Input.GetAxis("Mouse Y") * rotSpeed * Mathf.Deg2Rad;
-
         if (toolSelected == "z_arrow")
         {
             Vector3 normal = Vector3.Cross(parentGameObject.transform.up, parentGameObject.transform.right);
 
-            if (Mathf.Abs((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100))) < threshold)
+            if (calcMouseDif(worldPosition, normal) < threshold)
             {
+                if (calcMouseDif(worldPosition, normal) != 0)
+                    Debug.Log("Mpike");
                 tempVector4 = worldPosition;
                 return;
             }
-            offset = new Vector3((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)), 0.0f, 0.0f).normalized * Time.deltaTime * moveSpeed;
+            offset = calcOffset(worldPosition, normal);
         }
         else if (toolSelected == "y_arrow")
         {
             Vector3 normal = Vector3.Cross(parentGameObject.transform.right, parentGameObject.transform.forward);
 
-            if (Mathf.Abs((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100))) < threshold)
+            if (calcMouseDif(worldPosition, normal) < threshold)
             {
                 tempVector4 = worldPosition;
                 return;
             }
-            offset = new Vector3((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)), 0.0f, 0.0f).normalized * Time.deltaTime * moveSpeed;
+            offset = calcOffset(worldPosition, normal);
         }
         else if (toolSelected == "x_arrow")
         {
             Vector3 normal = Vector3.Cross(parentGameObject.transform.forward, parentGameObject.transform.up);
 
-            if (Mathf.Abs((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100))) < threshold)
+            if (calcMouseDif(worldPosition, normal) < threshold)
             {
                 tempVector4 = worldPosition;
                 return;
             }
-            offset = new Vector3((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)), 0.0f, 0.0f).normalized * Time.deltaTime * moveSpeed;
+            offset = calcOffset(worldPosition, normal);
         }
         else if (toolSelected == "z_rotate_arrow")
         {
@@ -137,31 +152,45 @@ public class ToolSelection : MonoBehaviour
         }
         else if (toolSelected == "z_scale_arrow")
         {
-            Vector3 normal = Vector3.Cross(parentGameObject.transform.up, parentGameObject.transform.right);
-            Vector3 tempScale = parentGameObject.transform.localScale;
+            Vector3 normal = Vector3.Cross(-parentGameObject.transform.up, parentGameObject.transform.right);
+
+            if (calcMouseDif(worldPosition, normal) < threshold)
+            {
+                tempVector4 = worldPosition;
+                return;
+            }
+
+            Vector3 tempScale = modelGameObject.transform.localScale;
             tempScale.z = tempScale.z + tempScale.z * scaleSpeed * Time.deltaTime * ((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)));
-
-            //parentGameObject.transform.DetachChildren();
-
-            parentGameObject.transform.localScale = tempScale;
-
-            //GameObject test1 = GameObject.FindGameObjectWithTag("x_scale_arrow");
-            //GameObject test2 = GameObject.FindGameObjectWithTag("y_scale_arrow");
-            //GameObject test3 = GameObject.FindGameObjectWithTag("z_scale_arrow");
-
-            //test1.transform.SetParent(parentGameObject.transform);
-            //test2.transform.SetParent(parentGameObject.transform);
-            //test3.transform.SetParent(parentGameObject.transform);
+            modelGameObject.transform.localScale = tempScale;
         }
         else if (toolSelected == "y_scale_arrow")
         {
-            Vector3 normal = Vector3.Cross(parentGameObject.transform.right, parentGameObject.transform.forward);
-            parentGameObject.transform.Rotate(Vector3.up, -rotX * normal.x - rotY * normal.y);
+            Vector3 normal = Vector3.Cross(-parentGameObject.transform.right, parentGameObject.transform.forward);
+
+            if (calcMouseDif(worldPosition, normal) < threshold)
+            {
+                tempVector4 = worldPosition;
+                return;
+            }
+
+            Vector3 tempScale = modelGameObject.transform.localScale;
+            tempScale.y = tempScale.y + tempScale.y * scaleSpeed * Time.deltaTime * ((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)));
+            modelGameObject.transform.localScale = tempScale;
         }
         else if (toolSelected == "x_scale_arrow")
         {
-            Vector3 normal = Vector3.Cross(parentGameObject.transform.forward, parentGameObject.transform.up);
-            parentGameObject.transform.Rotate(Vector3.right, -rotX * normal.x - rotY * normal.y);
+            Vector3 normal = Vector3.Cross(-parentGameObject.transform.forward, parentGameObject.transform.up);
+
+            if (calcMouseDif(worldPosition, normal) < threshold)
+            {
+                tempVector4 = worldPosition;
+                return;
+            }
+
+            Vector3 tempScale = modelGameObject.transform.localScale;
+            tempScale.x = tempScale.x + tempScale.x * scaleSpeed * Time.deltaTime * ((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)));
+            modelGameObject.transform.localScale = tempScale;
         }
 
 

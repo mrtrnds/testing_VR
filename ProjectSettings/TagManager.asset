@@ -15,6 +15,7 @@ TagManager:
   - y_scale_arrow
   - z_scale_arrow
   - selectedObject
+  - selectedParent
   layers:
   - Default
   - TransparentFX
