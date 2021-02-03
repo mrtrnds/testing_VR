@@ -5,20 +5,17 @@ using UnityEngine;
 
 public class Transformation : MonoBehaviour
 {
-    public float scaleSpeed = 0.01f;
-    private Vector3 previousScale;
-    private Vector3 firstPosition;
-    private bool firstCalled = true;
-    public Camera thisCam;
     public GameObject moveArrow = null;
     public GameObject rotateArrow = null;
     public GameObject scaleArrow = null;
     public Material transparentMaterial = null;
+    private bool firstCalled = true;
     private Material defaultMaterial;
     private GameObject clone, clone2, clone3;
     private string previousButton = null;
     private Vector3 scaleVector;
     private float scaleFactor;
+    private Vector3 initScaleVector;
 
     private Vector3 GetMouseWorldPos()
     {
@@ -35,25 +32,44 @@ public class Transformation : MonoBehaviour
         }
         return clickPosition;
     }
+    public void Start()
+    {
+        initScaleVector = transform.localScale;
+    }
 
     public void Update()
     {
         scaleFactor = (Camera.main.transform.position - transform.position).magnitude;
         GameObject thePlayerIs = GameObject.Find("MainCamera");
         ButtonSelection theChoiseOfThePlayerIs = thePlayerIs.GetComponent<ButtonSelection>();
+        scaleVector = initScaleVector;//arxiko scale 2,2,2 h 1,1,1 h 4,3,4
 
         if (theChoiseOfThePlayerIs.buttonSelected != previousButton && previousButton != "" && this.tag == "selectedObject")
         {
             firstCalled = true;
             OnMouseDown();  
         }
-        if (firstCalled == false)
+        if (firstCalled == false && theChoiseOfThePlayerIs.buttonSelected != "Scaddle")
         {
-            scaleVector = transform.localScale;
-            clone.transform.localScale = new Vector3((scaleFactor * 1.5f) / scaleVector[0], (scaleFactor * 1.5f) / scaleVector[1], (scaleFactor * 1.5f) / scaleVector[2]);
-            clone2.transform.localScale = new Vector3((scaleFactor * 1.5f) / scaleVector[0], (scaleFactor * 1.5f) / scaleVector[1], (scaleFactor * 1.5f) / scaleVector[2]);
-            clone3.transform.localScale = new Vector3((scaleFactor * 1.5f) / scaleVector[0], (scaleFactor * 1.5f) / scaleVector[1], (scaleFactor * 1.5f) / scaleVector[2]);
+            scaleVector[0] = (scaleFactor * 1.5f) / scaleVector[0];
+            scaleVector[1] = (scaleFactor * 1.5f) / scaleVector[1];
+            scaleVector[2] = (scaleFactor * 1.5f) / scaleVector[2];
+
+            clone.transform.localScale = new Vector3(scaleVector[0],  scaleVector[1], scaleVector[2]);
+            clone2.transform.localScale = new Vector3(scaleVector[0], scaleVector[1], scaleVector[2]);
+            clone3.transform.localScale = new Vector3(scaleVector[0], scaleVector[1], scaleVector[2]);
         }
+        else if(firstCalled == false)
+        {
+            scaleVector[0] = (scaleFactor * 1.5f)/transform.localScale.x ;
+            scaleVector[1] = (scaleFactor * 1.5f)/transform.localScale.y ;
+            scaleVector[2] = (scaleFactor * 1.5f)/transform.localScale.z;
+
+            clone.transform.localScale = new Vector3(scaleVector[0], scaleVector[1], scaleVector[2]);
+            clone2.transform.localScale = new Vector3(scaleVector[0], scaleVector[1], scaleVector[2]);
+            clone3.transform.localScale = new Vector3(scaleVector[0], scaleVector[1], scaleVector[2]);
+        }
+
         previousButton = theChoiseOfThePlayerIs.buttonSelected;
     }
 
@@ -102,17 +118,21 @@ public class Transformation : MonoBehaviour
             }
 
             clone = Instantiate(arrow, transform.position, transform.rotation);
-            clone.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+            float rescale_clone_x = (scaleFactor * 1.5f) / transform.localScale.x;
+            float rescale_clone_y = (scaleFactor * 1.5f) / transform.localScale.y;
+            float rescale_clone_z = (scaleFactor * 1.5f) / transform.localScale.z;
+
+            clone.transform.localScale = new Vector3(rescale_clone_x, rescale_clone_y, rescale_clone_z);
             clone.GetComponent<Renderer>().material.SetColor("_Color", Color.blue);
             clone.transform.SetParent(transform);
 
             clone2 = Instantiate(arrow, transform.position, transform.rotation);
-            clone2.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+            clone2.transform.localScale = new Vector3(rescale_clone_x, rescale_clone_y, rescale_clone_z);
             clone2.GetComponent<Renderer>().material.SetColor("_Color", Color.green);
             clone2.transform.SetParent(transform);
 
             clone3 = Instantiate(arrow, transform.position, transform.rotation);
-            clone3.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+            clone3.transform.localScale = new Vector3(rescale_clone_x, rescale_clone_y, rescale_clone_z);
             clone3.GetComponent<Renderer>().material.SetColor("_Color", Color.red);
             clone3.transform.SetParent(transform);
 
@@ -131,7 +151,6 @@ public class Transformation : MonoBehaviour
                 clone.transform.Rotate(180, 0, 0);
                 clone2.transform.Rotate(90, 0, 0);
                 clone3.transform.Rotate(0, 270, 0);
-
             }
             else if (selectedButton == "Scale") {
                 clone.tag = "z_scale_arrow";
@@ -140,7 +159,6 @@ public class Transformation : MonoBehaviour
                 clone.transform.Rotate(0, 90, 0);
                 clone2.transform.Rotate(0, 0, -90);
                 clone3.transform.Rotate(0, 180, 0);
-
             }
         }
     }

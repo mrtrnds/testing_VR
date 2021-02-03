@@ -4,14 +4,16 @@ using UnityEngine;
 
 public class ToolSelection : MonoBehaviour
 {
-    public string toolSelected = "";
+    private string toolSelected = "";
     private GameObject parentGameObject;
     private Vector3 v3Pos;
     private float threshold = 0.1f;
-    private Vector3 tempVector4 = Vector3.zero;
     private bool firstcall = true;
     private Vector3 firstParentGameObject = Vector3.zero;
-    public float rotSpeed = 80f;
+    public float rotSpeed = 100.0f;
+    public float scaleSpeed = 1.0f;
+    public float moveSpeed = 1.0f;
+    private Vector3 tempVector4 = Vector3.zero;
 
     private Vector3 GetMouseScreenPos()
     {
@@ -34,10 +36,10 @@ public class ToolSelection : MonoBehaviour
     {
         Vector3 worldPosition = Vector3.zero;
         Vector3 m_DistanceFromCamera = new Vector3(Camera.main.transform.position.x, Camera.main.transform.position.y, inPoint.z);
-
         Plane plane = new Plane(inNormal, m_DistanceFromCamera);
         float distance;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
         if (plane.Raycast(ray, out distance))
         {
             return worldPosition = ray.GetPoint(distance);
@@ -57,10 +59,10 @@ public class ToolSelection : MonoBehaviour
         "x_scale_arrow",
         "y_scale_arrow",
         "z_scale_arrow"};
-
         Vector3 mousePoint = Input.mousePosition;
         Ray ray = Camera.main.ScreenPointToRay(mousePoint);
         RaycastHit hit;
+
         if (Physics.Raycast(ray, out hit, 100.0f))
         {
             if (listWithTags.Contains(hit.collider.tag))
@@ -94,7 +96,7 @@ public class ToolSelection : MonoBehaviour
                 tempVector4 = worldPosition;
                 return;
             }
-            offset = new Vector3((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)), 0.0f, 0.0f).normalized * Time.deltaTime * (0.5f);
+            offset = new Vector3((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)), 0.0f, 0.0f).normalized * Time.deltaTime * moveSpeed;
         }
         else if (toolSelected == "y_arrow")
         {
@@ -105,7 +107,7 @@ public class ToolSelection : MonoBehaviour
                 tempVector4 = worldPosition;
                 return;
             }
-            offset = new Vector3((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)), 0.0f, 0.0f).normalized * Time.deltaTime * (0.5f);
+            offset = new Vector3((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)), 0.0f, 0.0f).normalized * Time.deltaTime * moveSpeed;
         }
         else if (toolSelected == "x_arrow")
         {
@@ -113,16 +115,15 @@ public class ToolSelection : MonoBehaviour
 
             if (Mathf.Abs((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100))) < threshold)
             {
-                Debug.Log("kanei return");
                 tempVector4 = worldPosition;
                 return;
             }
-            offset = new Vector3((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)), 0.0f, 0.0f).normalized * Time.deltaTime * (0.5f);
+            offset = new Vector3((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)), 0.0f, 0.0f).normalized * Time.deltaTime * moveSpeed;
         }
         else if (toolSelected == "z_rotate_arrow")
         {
             Vector3 normal = Vector3.Cross(parentGameObject.transform.up, parentGameObject.transform.right);
-            parentGameObject.transform.Rotate(Vector3.forward, -rotX * normal.y - rotY * normal.x);
+            parentGameObject.transform.Rotate(Vector3.forward, -rotX * normal.y - rotY * normal.x);           
         }
         else if (toolSelected == "y_rotate_arrow")
         {
@@ -137,7 +138,20 @@ public class ToolSelection : MonoBehaviour
         else if (toolSelected == "z_scale_arrow")
         {
             Vector3 normal = Vector3.Cross(parentGameObject.transform.up, parentGameObject.transform.right);
-            parentGameObject.transform.Rotate(Vector3.forward, -rotX * normal.x - rotY * normal.y);
+            Vector3 tempScale = parentGameObject.transform.localScale;
+            tempScale.z = tempScale.z + tempScale.z * scaleSpeed * Time.deltaTime * ((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)));
+
+            //parentGameObject.transform.DetachChildren();
+
+            parentGameObject.transform.localScale = tempScale;
+
+            //GameObject test1 = GameObject.FindGameObjectWithTag("x_scale_arrow");
+            //GameObject test2 = GameObject.FindGameObjectWithTag("y_scale_arrow");
+            //GameObject test3 = GameObject.FindGameObjectWithTag("z_scale_arrow");
+
+            //test1.transform.SetParent(parentGameObject.transform);
+            //test2.transform.SetParent(parentGameObject.transform);
+            //test3.transform.SetParent(parentGameObject.transform);
         }
         else if (toolSelected == "y_scale_arrow")
         {
