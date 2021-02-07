@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ToolSelection : MonoBehaviour
 {
-    public float rotSpeed = 500.0f;
+    public float rotSpeed = 5.0f;
     public float scaleSpeed = 0.05f;
     public float moveSpeed = 1.0f;
 
@@ -146,7 +146,7 @@ public class ToolSelection : MonoBehaviour
                 tempVector4 = worldPosition;
                 return;
             }
-            parentGameObject.transform.Rotate(Vector3.forward, (-(worldPosition.x - tempVector4.x) * normal.x - (worldPosition.y - tempVector4.y) * normal.y) * rotSpeed * Mathf.Deg2Rad);           
+            parentGameObject.transform.Rotate(Vector3.forward, (((worldPosition.x + 100) * normal.y * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.x * (worldPosition.y + 100)) - ((tempVector4.x + 100) * normal.y * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.x * (tempVector4.y + 100))) * rotSpeed * Mathf.Deg2Rad);           
         }
         else if (toolSelected == "y_rotate_arrow")
         {
@@ -156,17 +156,17 @@ public class ToolSelection : MonoBehaviour
                 tempVector4 = worldPosition;
                 return;
             }
-            parentGameObject.transform.Rotate(Vector3.up, (-(worldPosition.x - tempVector4.x) * normal.x - (worldPosition.y - tempVector4.y) * normal.y) * rotSpeed * Mathf.Deg2Rad);
+            parentGameObject.transform.Rotate(Vector3.up, (((worldPosition.x + 100) * normal.y * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.x * (worldPosition.y + 100)) - ((tempVector4.x + 100) * normal.y * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.x * (tempVector4.y + 100))) * rotSpeed * Mathf.Deg2Rad);
         }
         else if (toolSelected == "x_rotate_arrow")
         {
-            Vector3 normal = Vector3.Cross(parentGameObject.transform.forward, parentGameObject.transform.up);
+            Vector3 normal = Vector3.Cross(-parentGameObject.transform.forward, parentGameObject.transform.up);
             if (calcMouseDif(worldPosition, normal) < threshold)
             {
                 tempVector4 = worldPosition;
                 return;
             }
-            parentGameObject.transform.Rotate(Vector3.right, (-(worldPosition.x - tempVector4.x) * normal.x - (worldPosition.y - tempVector4.y) * normal.y) * rotSpeed * Mathf.Deg2Rad);
+            parentGameObject.transform.Rotate(Vector3.right, (((worldPosition.x + 100) * normal.y * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.x * (worldPosition.y + 100)) - ((tempVector4.x + 100) * normal.y * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.x * (tempVector4.y + 100))) * rotSpeed * Mathf.Deg2Rad);
         }
         else if (toolSelected == "z_scale_arrow")
         {
@@ -179,7 +179,7 @@ public class ToolSelection : MonoBehaviour
             }
 
             Vector3 tempScale = modelGameObject.transform.localScale;
-            tempScale.z = tempScale.z + tempScale.z * scaleSpeed * Time.deltaTime * ((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)));
+            tempScale.z = tempScale.z + tempScale.z * scaleSpeed * Time.deltaTime * (((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100)) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)));
             if (tempScale.z < 0.3f)
                 modelGameObject.transform.localScale = previousScale;
             else
@@ -199,7 +199,7 @@ public class ToolSelection : MonoBehaviour
             }
 
             Vector3 tempScale = modelGameObject.transform.localScale;
-            tempScale.y = tempScale.y + tempScale.y * scaleSpeed * Time.deltaTime * ((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)));
+            tempScale.y = tempScale.y + tempScale.y * scaleSpeed * Time.deltaTime * (((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100)) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)));
             if (tempScale.y < 0.3f)
                 modelGameObject.transform.localScale = previousScale;
             else
@@ -219,7 +219,7 @@ public class ToolSelection : MonoBehaviour
             }
 
             Vector3 tempScale = modelGameObject.transform.localScale;
-            tempScale.x = tempScale.x + tempScale.x * scaleSpeed * Time.deltaTime * ((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)));
+            tempScale.x = tempScale.x + tempScale.x * scaleSpeed * Time.deltaTime * (((worldPosition.x + 100) * normal.x * (worldPosition.x + 100) + (worldPosition.y + 100) * normal.y * (worldPosition.y + 100)) - ((tempVector4.x + 100) * normal.x * (tempVector4.x + 100) + (tempVector4.y + 100) * normal.y * (tempVector4.y + 100)));
             if (tempScale.x < 0.3f)
                 modelGameObject.transform.localScale = previousScale;
             else

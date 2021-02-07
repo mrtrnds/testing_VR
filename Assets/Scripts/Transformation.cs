@@ -64,22 +64,19 @@ public class Transformation : MonoBehaviour
         }
         if ((firstCalled == true && selectedButton != "") || (previousButton != null && previousButton != selectedButton)) {
             GameObject previousSelectedObject = GameObject.FindGameObjectWithTag("selectedObject");
-            if (previousSelectedObject != null) //clear arrows from other selected gameobjects
+            if (previousSelectedObject != null && previousSelectedObject.tag == "selectedObject") //clear arrows from other selected gameobjects
             {
-                if (previousSelectedObject.tag == "selectedObject")
+                previousSelectedObject.GetComponent<MeshRenderer>().material = defaultMaterial;
+                Destroy(previousSelectedObject.GetComponent<Transformation>().clone);
+                Destroy(previousSelectedObject.GetComponent<Transformation>().clone2);
+                Destroy(previousSelectedObject.GetComponent<Transformation>().clone3);
+                previousSelectedObject.GetComponent<Transformation>().firstCalled = true;
+                previousSelectedObject.tag = "Untagged";
+                previousSelectedObject.layer = LayerMask.NameToLayer("Default");
+                previousSelectedObject.transform.parent.gameObject.tag = "Untagged";
+                if (previousButton == "Scale")
                 {
-                    previousSelectedObject.GetComponent<MeshRenderer>().material = defaultMaterial;
-                    Destroy(previousSelectedObject.GetComponent<Transformation>().clone);
-                    Destroy(previousSelectedObject.GetComponent<Transformation>().clone2);
-                    Destroy(previousSelectedObject.GetComponent<Transformation>().clone3);
-                    previousSelectedObject.GetComponent<Transformation>().firstCalled = true;
-                    previousSelectedObject.tag = "Untagged";
-                    previousSelectedObject.layer = LayerMask.NameToLayer("Default");
-                    previousSelectedObject.transform.parent.gameObject.tag = "Untagged";
-                    if (previousButton == "Scale")
-                    {
-                        Destroy(previousSelectedObject.GetComponent<Transformation>().clone4);
-                    }
+                    Destroy(previousSelectedObject.GetComponent<Transformation>().clone4);
                 }
             }
             previousButton = selectedButton;
