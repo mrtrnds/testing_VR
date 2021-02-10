@@ -20,6 +20,16 @@ public class ToolSelection : MonoBehaviour
     private readonly float threshold = 1.0f;
     private bool firstcall = true;
 
+    private ObjectState currentState, previousState;
+    GameObject mainCamera;
+
+    void Start()
+    {
+        parentGameObject = GameObject.FindGameObjectWithTag("selectedParent");
+        modelGameObject = GameObject.FindGameObjectWithTag("selectedObject");
+        mainCamera = GameObject.Find("MainCamera");
+    }
+
     private Vector3 GetMouseScreenPos()
     {
         //Pixel coordinates (x,y)
@@ -65,6 +75,7 @@ public class ToolSelection : MonoBehaviour
         "z_scale_arrow",
         "scale_box"};
 
+        previousState = new ObjectState(parentGameObject, modelGameObject);
         Vector2 mousePoint = Input.mousePosition;
         Ray ray = Camera.main.ScreenPointToRay(mousePoint);
         RaycastHit hit;
@@ -90,8 +101,6 @@ public class ToolSelection : MonoBehaviour
 
     public void OnMouseDrag()
     {
-        parentGameObject = GameObject.FindGameObjectWithTag("selectedParent");
-        modelGameObject = GameObject.FindGameObjectWithTag("selectedObject");
         Vector3 offset = Vector3.zero;
         Vector3 worldPosition = GetWorldMousePosition(Vector3.forward, firstParentPosition);
 
@@ -257,5 +266,10 @@ public class ToolSelection : MonoBehaviour
     void OnMouseUp()
     {
         firstcall = true;
+        ObjectState currentState = new ObjectState(parentGameObject, modelGameObject);
+        StoreHistory myList = mainCamera.GetComponent<StoreHistory>();
+        UndoRedo<ObjectState>  secondList = myList.Get();
+        secondList.Push(currentState);
+        //UndoRedo.AddAction(new UndoableChange(currentState, previousState));
     }
 }
