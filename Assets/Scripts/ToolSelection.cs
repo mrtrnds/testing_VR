@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ToolSelection : MonoBehaviour
 {
-    public float rotSpeed = 5.0f;
+    public float rotSpeed = 1.0f;
     public float scaleSpeed = 0.05f;
     public float moveSpeed = 1.0f;
 
@@ -20,7 +20,7 @@ public class ToolSelection : MonoBehaviour
     private readonly float threshold = 1.0f;
     private bool firstcall = true;
 
-    private ObjectState currentState, previousState;
+    private ButtonSelection theChoiseOfThePlayerIs;
     GameObject mainCamera;
 
     void Start()
@@ -75,18 +75,19 @@ public class ToolSelection : MonoBehaviour
         "z_scale_arrow",
         "scale_box"};
 
-        previousState = new ObjectState(parentGameObject, modelGameObject);
         Vector2 mousePoint = Input.mousePosition;
         Ray ray = Camera.main.ScreenPointToRay(mousePoint);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, 100.0f))
-        {
+        if (Physics.Raycast(ray, out hit, 200.0f))
             if (listWithTags.Contains(hit.collider.tag))
-            {
                 toolSelected = hit.collider.tag;
-            }
-        }
+
+        theChoiseOfThePlayerIs = mainCamera.GetComponent<ButtonSelection>();
+        ObjectState currentState = new ObjectState(parentGameObject, modelGameObject, theChoiseOfThePlayerIs.buttonSelected);
+        StoreHistory myList = mainCamera.GetComponent<StoreHistory>();
+        UndoRedo<ObjectState> secondList = myList.Get();
+        secondList.PushToUndoList(currentState);
     }
 
     private float calcMouseDif(Vector3 worldPosition, Vector3 normalVec)
@@ -111,8 +112,6 @@ public class ToolSelection : MonoBehaviour
             tempVector4 = worldPosition;
             return;
         }
-        float rotX = Input.GetAxis("Mouse X") * rotSpeed * Mathf.Deg2Rad;
-        float rotY = Input.GetAxis("Mouse Y") * rotSpeed * Mathf.Deg2Rad;
 
         if (toolSelected == "z_arrow")
         {
@@ -265,11 +264,11 @@ public class ToolSelection : MonoBehaviour
 
     void OnMouseUp()
     {
-        firstcall = true;
-        ObjectState currentState = new ObjectState(parentGameObject, modelGameObject);
+        theChoiseOfThePlayerIs = mainCamera.GetComponent<ButtonSelection>();
+        ObjectState currentState = new ObjectState(parentGameObject, modelGameObject, theChoiseOfThePlayerIs.buttonSelected);
         StoreHistory myList = mainCamera.GetComponent<StoreHistory>();
-        UndoRedo<ObjectState>  secondList = myList.Get();
-        secondList.Push(currentState);
-        //UndoRedo.AddAction(new UndoableChange(currentState, previousState));
+        UndoRedo<ObjectState> secondList = myList.Get();
+        secondList.PushToUndoList(currentState);
+        firstcall = true;
     }
 }

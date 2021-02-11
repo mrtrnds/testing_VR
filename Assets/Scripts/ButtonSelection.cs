@@ -17,10 +17,14 @@ public class ButtonSelection : MonoBehaviour
     {
         buttonSelected = buttonName;
         //Destroy (clone);
- 
-        if (buttonName == "Annotation")
+
+        if (buttonName == "Undo")
         {
             Cursor.SetCursor(cursorTexture_annotation, Vector2.zero, cursorMode);
+        }
+        else if (buttonName == "Redo")
+        {
+            Cursor.SetCursor(cursorTexture_scale, Vector2.zero, cursorMode);
         }
         else if (buttonName == "Scale")
         {
