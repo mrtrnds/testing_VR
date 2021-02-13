@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Transformation : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class Transformation : MonoBehaviour
     public GameObject scaleArrow = null;
     public GameObject scaleBox = null;
     public Material transparentMaterial = null;
+
+    public InputField textArea;
+
     private bool firstCalled = true;
     private Material defaultMaterial;
     private GameObject clone, clone2, clone3, clone4;
@@ -16,22 +20,7 @@ public class Transformation : MonoBehaviour
     private float scaleFactor;
     private GameObject mainCamera;
     private ButtonSelection theChoiseOfThePlayerIs;
-
-    private Vector3 GetMouseWorldPos()
-    {
-        //Pixel coordinates (x,y)
-        Vector3 mousePoint = Input.mousePosition;
-        Vector3 clickPosition = -Vector3.one;
-
-        Ray ray = Camera.main.ScreenPointToRay(mousePoint);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit))
-        {
-            return clickPosition = hit.point;
-        }
-        return clickPosition;
-    }
+    private bool annotationBool = false;
 
     public void Awake()
     {
@@ -60,7 +49,7 @@ public class Transformation : MonoBehaviour
     }
 
     public void OnMouseDown() {
-        string selectedButton = theChoiseOfThePlayerIs.buttonSelected;
+           string selectedButton = theChoiseOfThePlayerIs.buttonSelected;
 
         GameObject arrow = null;
 
@@ -91,7 +80,7 @@ public class Transformation : MonoBehaviour
             GameObject parentBox = this.transform.parent.gameObject;
             parentBox.tag = "selectedParent";
 
-            if (selectedButton != "Undo" && selectedButton != "Redo")
+            if (selectedButton != "Undo" && selectedButton != "Redo" && selectedButton != "Annotation")
             {
                 GetComponent<MeshRenderer>().material = transparentMaterial;
 
@@ -186,8 +175,25 @@ public class Transformation : MonoBehaviour
                     OnMouseDown();
                 }
             }
+            else if (selectedButton == "Annotation")
+            {
+                this.firstCalled = true;
+                if (annotationBool == false)
+                {
+                    annotationBool = true;
+                    Vector2 anchoredPos;
+                    RectTransformUtility.ScreenPointToLocalPointInRectangle(GameObject.FindGameObjectWithTag("Canvas").GetComponent<RectTransform>(), Input.mousePosition, mainCamera.GetComponent<Camera>(), out anchoredPos);
+                    Vector3 arriveAt = new Vector3(anchoredPos.x, anchoredPos.y, 0);
+                    GameObject nu = Instantiate(textArea.gameObject, arriveAt, Quaternion.identity) as GameObject;
+                    nu.transform.SetParent(GameObject.FindGameObjectWithTag("Canvas").GetComponent<RectTransform>().transform, false);
+                    nu.SetActive(true);
+                }
+            }
         }   
     }
+
+
+
 
     void OnMouseUp()
     {

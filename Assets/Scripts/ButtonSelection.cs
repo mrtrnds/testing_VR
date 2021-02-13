@@ -38,6 +38,10 @@ public class ButtonSelection : MonoBehaviour
         {
             Cursor.SetCursor(cursorTexture_move, Vector2.zero, cursorMode);
         }
+        else if (buttonName == "Annotation")
+        {
+            Cursor.SetCursor(cursorTexture_move, Vector2.zero, cursorMode);
+        }
         else
         {
             Cursor.SetCursor(null, Vector2.zero, cursorMode);

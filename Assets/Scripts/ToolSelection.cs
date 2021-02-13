@@ -30,22 +30,6 @@ public class ToolSelection : MonoBehaviour
         mainCamera = GameObject.Find("MainCamera");
     }
 
-    private Vector3 GetMouseScreenPos()
-    {
-        //Pixel coordinates (x,y)
-        Vector2 mousePoint = Input.mousePosition;
-        Vector2 clickPosition = -Vector2.one;
-
-        Ray ray = Camera.main.ScreenPointToRay(mousePoint);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit))
-        {
-            return clickPosition = Camera.main.WorldToScreenPoint(hit.point);
-        }
-        return clickPosition;
-    }
-
     private Vector3 GetWorldMousePosition(Vector3 inNormal, Vector3 inPoint)
     {
         Vector3 worldPosition = Vector3.zero;
