@@ -107,5 +107,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotSpeed: 1
-  scaleSpeed: 0.05
+  scaleSpeed: 50
   moveSpeed: 1
