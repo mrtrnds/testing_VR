@@ -5,7 +5,7 @@ using UnityEngine;
 public class ToolSelection : MonoBehaviour
 {
     public float rotSpeed = 1.0f;
-    public float scaleSpeed = 50.0f;
+    public float scaleSpeed = 5000.0f;
     public float moveSpeed = 1.0f;
 
     private GameObject parentGameObject;

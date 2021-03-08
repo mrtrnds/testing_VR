@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,6 +14,8 @@ public class Transformation : MonoBehaviour
 
     public InputField textArea;
 
+    private bool defaultCalled = true;
+    private bool checkBool = false;
     private bool firstCalled = true;
     private Material defaultMaterial;
     private GameObject clone, clone2, clone3, clone4;
@@ -28,16 +31,35 @@ public class Transformation : MonoBehaviour
         theChoiseOfThePlayerIs = mainCamera.GetComponent<ButtonSelection>();
     }
 
+    public void SetCheckBool(bool val)
+    {
+        checkBool = val;
+    }
+
+    public bool GetCheckBool()
+    {
+        return checkBool;
+    }
+
+    public void SetDefaultCalled(bool val)
+    {
+        defaultCalled = val;
+    }
+
+    public bool GetFirstCalled()
+    {
+        return firstCalled;
+    }
+
     public void Update()
     {
-        scaleFactor = (Camera.main.transform.position - transform.position).magnitude * 1.5f;
+        scaleFactor = (Camera.main.transform.position - transform.position).magnitude;
 
-        if (theChoiseOfThePlayerIs.buttonSelected != previousButton && previousButton != "" && this.tag == "selectedObject")
+        if (theChoiseOfThePlayerIs.buttonSelected != previousButton && previousButton != "" && this.tag == "selectedObject" && defaultCalled == false && theChoiseOfThePlayerIs.buttonSelected != "None")
         {
-            firstCalled = true;
             OnMouseDown();
         }
-        if (firstCalled == false)
+        if (firstCalled == false && defaultCalled == false && theChoiseOfThePlayerIs.buttonSelected != "Redo" && theChoiseOfThePlayerIs.buttonSelected != "Undo" && theChoiseOfThePlayerIs.buttonSelected != "None")
         {
             clone.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
             clone2.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
@@ -48,54 +70,57 @@ public class Transformation : MonoBehaviour
         previousButton = theChoiseOfThePlayerIs.buttonSelected;
     }
 
-    public void OnMouseDown() {
-           string selectedButton = theChoiseOfThePlayerIs.buttonSelected;
-
-        GameObject arrow = null;
-
-        if (firstCalled == true && selectedButton != "") {
-            defaultMaterial = GetComponent<MeshRenderer>().material;
-        }
-        if ((firstCalled == true && selectedButton != "") || (previousButton != null && previousButton != selectedButton) || (selectedButton == "Undo")) {
-            GameObject previousSelectedObject = GameObject.FindGameObjectWithTag("selectedObject");
-            if (previousSelectedObject != null && previousSelectedObject.tag == "selectedObject") //clear arrows from other selected gameobjects
+    public void disableTools()
+    {
+        GameObject previousSelectedObject = GameObject.FindGameObjectWithTag("selectedObject");
+        if (previousSelectedObject != null && previousSelectedObject.tag == "selectedObject") //clear arrows from other selected gameobjects
+        {
+            previousSelectedObject.GetComponent<MeshRenderer>().material = defaultMaterial;
+            Destroy(previousSelectedObject.GetComponent<Transformation>().clone);
+            Destroy(previousSelectedObject.GetComponent<Transformation>().clone2);
+            Destroy(previousSelectedObject.GetComponent<Transformation>().clone3);
+            previousSelectedObject.GetComponent<Transformation>().firstCalled = true;
+            previousSelectedObject.tag = "ModelTag";
+            previousSelectedObject.layer = LayerMask.NameToLayer("Default");
+            previousSelectedObject.transform.parent.gameObject.tag = "Untagged";
+            if (previousButton == "Scale")
             {
-                previousSelectedObject.GetComponent<MeshRenderer>().material = defaultMaterial;
-                Destroy(previousSelectedObject.GetComponent<Transformation>().clone);
-                Destroy(previousSelectedObject.GetComponent<Transformation>().clone2);
-                Destroy(previousSelectedObject.GetComponent<Transformation>().clone3);
-                previousSelectedObject.GetComponent<Transformation>().firstCalled = true;
-                previousSelectedObject.tag = "Untagged";
-                previousSelectedObject.layer = LayerMask.NameToLayer("Default");
-                previousSelectedObject.transform.parent.gameObject.tag = "Untagged";
-                if (previousButton == "Scale")
-                {
-                    Destroy(previousSelectedObject.GetComponent<Transformation>().clone4.gameObject);
-                }
+                Destroy(previousSelectedObject.GetComponent<Transformation>().clone4.gameObject);
             }
+        }
+    }
+
+    public void OnMouseDown()
+    {
+        string selectedButton = theChoiseOfThePlayerIs.buttonSelected;
+        GameObject arrow = null;
+        defaultCalled = false;
+
+        if (firstCalled == true && selectedButton != "")
+            defaultMaterial = GetComponent<MeshRenderer>().material;
+
+        if ((firstCalled == true && selectedButton != "") || (previousButton != null && previousButton != selectedButton) || (selectedButton == "Undo"))
+        {
+            disableTools();
             previousButton = selectedButton;
             gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
-            this.firstCalled = false;
             this.tag = "selectedObject";
             GameObject parentBox = this.transform.parent.gameObject;
             parentBox.tag = "selectedParent";
+            this.firstCalled = false;
+            this.checkBool = true;
+            GetComponent<MeshRenderer>().material = transparentMaterial;
 
-            if (selectedButton != "Undo" && selectedButton != "Redo" && selectedButton != "Annotation")
+            if (selectedButton != "Undo" && selectedButton != "Redo" && selectedButton != "Annotation" && selectedButton != "None")
             {
-                GetComponent<MeshRenderer>().material = transparentMaterial;
+
 
                 if (selectedButton == "Move")
-                {
                     arrow = moveArrow;
-                }
                 else if (selectedButton == "Rotate")
-                {
                     arrow = rotateArrow;
-                }
                 else if (selectedButton == "Scale")
-                {
                     arrow = scaleArrow;
-                }
 
                 clone = Instantiate(arrow, transform.position, transform.rotation);
                 clone.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
@@ -147,37 +172,9 @@ public class Transformation : MonoBehaviour
                     clone3.transform.Rotate(0, 180, 0);
                 }
             }
-            else if (selectedButton == "Undo" || selectedButton == "Redo")
-            {
-                StoreHistory myList = mainCamera.GetComponent<StoreHistory>();
-                UndoRedo<ObjectState> secondList = myList.Get();
-                this.firstCalled = true;
-                if (secondList.GetUndoListCount() > 1 && selectedButton == "Undo")
-                {
-                    ObjectState previousState = secondList.PopFromUndoList();
-                    GameObject Parent = GameObject.Find(previousState.Name);
-                    GameObject Model = GameObject.Find(previousState.ModelName);
-                    Parent.transform.localPosition = previousState.LocalPosition;
-                    Parent.transform.localRotation = previousState.LocalRotation;
-                    Model.transform.localScale = previousState.ModelScale;
-                    theChoiseOfThePlayerIs.buttonSelected = previousState.ButtonSelected;
-                    OnMouseDown();
-                }
-                else if (secondList.GetRedoListCount() > 0 && selectedButton == "Redo")
-                {
-                    ObjectState previousState = secondList.PopFromRedoList();
-                    GameObject Parent = GameObject.Find(previousState.Name);
-                    GameObject Model = GameObject.Find(previousState.ModelName);
-                    Parent.transform.localPosition = previousState.LocalPosition;
-                    Parent.transform.localRotation = previousState.LocalRotation;
-                    Model.transform.localScale = previousState.ModelScale;
-                    theChoiseOfThePlayerIs.buttonSelected = previousState.ButtonSelected;
-                    OnMouseDown();
-                }
-            }
+
             else if (selectedButton == "Annotation")
             {
-                this.firstCalled = true;
                 if (annotationBool == false)
                 {
                     annotationBool = true;
@@ -189,15 +186,11 @@ public class Transformation : MonoBehaviour
                     nu.SetActive(true);
                 }
             }
-        }   
+        }
     }
-
-
-
 
     void OnMouseUp()
     {
 
     }
 }
-

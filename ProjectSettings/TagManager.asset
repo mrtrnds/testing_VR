@@ -18,6 +18,7 @@ TagManager:
   - selectedParent
   - scale_box
   - Canvas
+  - ModelTag
   layers:
   - Default
   - TransparentFX
