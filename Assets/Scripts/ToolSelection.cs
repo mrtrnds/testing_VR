@@ -62,10 +62,8 @@ public class ToolSelection : MonoBehaviour
         Vector2 mousePoint = Input.mousePosition;
         Ray ray = Camera.main.ScreenPointToRay(mousePoint);
         RaycastHit hit;
-        int layer_mask = LayerMask.GetMask("Default");
 
-
-        if (Physics.Raycast(ray, out hit, 1000, layer_mask))
+        if (Physics.Raycast(ray, out hit, 1000.0f))
             if (listWithTags.Contains(hit.collider.tag))
                 toolSelected = hit.collider.tag;
 

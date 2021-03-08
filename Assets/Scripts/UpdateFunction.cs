@@ -26,9 +26,24 @@ public class UpdateFunction : MonoBehaviour
             "selectedObject" };
             Vector2 mousePoint = Input.mousePosition;
             int layer_mask = LayerMask.GetMask("Ignore Raycast");
+            int layer_mask2 = LayerMask.GetMask("Default");
+
             Ray ray = Camera.main.ScreenPointToRay(mousePoint);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 1000, layer_mask))
+            {
+                if (!listWithTags.Contains(hit.collider.tag))
+                {
+                    GameObject Model = GameObject.FindGameObjectWithTag("selectedObject");
+                    if (Model != null)
+                    {
+                        Model.GetComponent<Transformation>().SetDefaultCalled(true);
+                        Model.GetComponent<Transformation>().disableTools();
+
+                    }
+                }
+            }
+            else if(Physics.Raycast(ray, out hit, 1000, layer_mask2))
             {
                 if (!listWithTags.Contains(hit.collider.tag))
                 {
