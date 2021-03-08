@@ -57,6 +57,7 @@ public class ButtonSelection : MonoBehaviour
             UndoRedo<ObjectState> secondList = myList.Get();
             if (secondList.GetUndoListCount() > 0)
             {
+                Debug.Log(secondList.GetUndoListCount());
                 buttonUndo.image.color = selectedColor;
 
                 ObjectState previousState = secondList.PopFromUndoList();

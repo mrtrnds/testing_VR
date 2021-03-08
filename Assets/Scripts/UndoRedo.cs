@@ -18,8 +18,10 @@ public class UndoRedo<T>
         return redoList.Count;
     }
 
-    public void PushToUndoList(ObjectState item)
+    public void PushToUndoList(ObjectState item, bool fromRedo=false)
     {
+        if (redoList.Count > 0 && fromRedo == false)
+            EmptyRedoList();
         if (undoList.Count > 19)
         {
             undoList.RemoveAt(undoList.Count - 20);
@@ -60,8 +62,8 @@ public class UndoRedo<T>
     {
         if (redoList.Count > 1)
         {
-            PushToUndoList(redoList[redoList.Count-1]);
-            PushToUndoList(redoList[redoList.Count - 2]);
+            PushToUndoList(redoList[redoList.Count-1], true);
+            PushToUndoList(redoList[redoList.Count - 2], true);
             ObjectState temp = redoList[redoList.Count - 2];
             redoList.RemoveAt(redoList.Count - 1);
             redoList.RemoveAt(redoList.Count - 1);
@@ -69,5 +71,11 @@ public class UndoRedo<T>
         }
         else
             return default(ObjectState);
+    }
+
+    public void EmptyRedoList()
+    {
+        redoList.Clear();
+
     }
 }

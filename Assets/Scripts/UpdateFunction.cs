@@ -1,38 +1,34 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class UpdateFunction : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
-        // apo dw allages
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && EventSystem.current != null && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
         {
             List<string> listWithTags = new List<string>() {
-                "ModelTag",
-                "x_arrow",
-                "y_arrow",
-                "z_arrow",
-                "x_rotate_arrow",
-                "y_rotate_arrow",
-                "z_rotate_arrow",
-                "x_scale_arrow",
-                "y_scale_arrow",
-                "z_scale_arrow",
-                "scale_box",
-                "selectedObject" };
+            "ModelTag",
+            "x_arrow",
+            "y_arrow",
+            "z_arrow",
+            "x_rotate_arrow",
+            "y_rotate_arrow",
+            "z_rotate_arrow",
+            "x_scale_arrow",
+            "y_scale_arrow",
+            "z_scale_arrow",
+            "scale_box",
+            "selectedObject" };
             Vector2 mousePoint = Input.mousePosition;
+            int layer_mask = LayerMask.GetMask("Ignore Raycast");
             Ray ray = Camera.main.ScreenPointToRay(mousePoint);
             RaycastHit hit;
-            if (Physics.Raycast(ray, out hit))
+            if (Physics.Raycast(ray, out hit, 1000, layer_mask))
             {
                 if (!listWithTags.Contains(hit.collider.tag))
                 {
@@ -44,7 +40,6 @@ public class UpdateFunction : MonoBehaviour
 
                     }
                 }
-
             }
             else
             {
